@@ -1,3 +1,5 @@
+// Main PhantomJS module, creates server and routes methods
+
 var system = require('system');
 var options = {
   port: system.args[1],
@@ -12,16 +14,17 @@ if(!options.port){
 var webserver = require('webserver');
 var server = webserver.create();
 
-console.log('PhantomJS server started', JSON.stringify(options), server);
+console.log('PhantomJS server starting on port', options.port);
 
 // Load available methods
 var methods = {};
 var methodsArray = options.methods.split(',');
 
 for(var i = 0; i < methodsArray.length; i++){
-  console.log('Loading Method Definition Script...', methodsArray[i]);
   var success = phantom.injectJs(methodsArray[i]);
-  console.log(success ? 'Success' : 'Failed');
+  if(!success){
+    console.log('Failed to load', methodsArray[i]);
+  };
 };
 
 var service = server.listen(options.port, {
@@ -38,7 +41,7 @@ var service = server.listen(options.port, {
       }else{
         output = result;
       };
-      var outputString = JSON.stringify(output);
+      var outputString = JSON.stringify(output || null);
       response.setHeader('Content-Length', outputString.length);
       response.write(outputString);
       response.close();
@@ -54,4 +57,4 @@ var service = server.listen(options.port, {
 });
 
 // TODO die after inactivity
-console.log('Ready.');
+console.log(options.port, 'Ready.');

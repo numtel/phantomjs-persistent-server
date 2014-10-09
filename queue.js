@@ -1,3 +1,5 @@
+// Main Meteor Package module, defines phantomLaunch function
+
 var Future = Npm.require('fibers/future');
 var phantomjs = Npm.require('phantomjs');
 var shell = Npm.require('child_process');
@@ -22,8 +24,7 @@ phantomLaunch = function(methods, port){
   var executive = function(method, options){
     // TODO: launch Phantom if port open, error if something else on port
     var url = 'http://localhost:' + port + '/';
-    console.log('Post to', url, options);
-    var content = JSON.stringify(options);
+    var content = JSON.stringify(options || {});
     var retval = HTTP.post(url, {
       headers: {
         method: method,
@@ -40,7 +41,7 @@ phantomLaunch = function(methods, port){
       throw new Meteor.Error(500, 'method-error');
     };
   };
-  
+
   var fut = new Future();
   portStatus = getPortStatus(port);
   if(portStatus === 'in-use'){
@@ -49,12 +50,12 @@ phantomLaunch = function(methods, port){
   }else if(portStatus === undefined){
     var command = shell.spawn(phantomjs.path,
       [assetDir + 'phantom-server.js', port, methods.join(',')]);
-    command.stdout.pipe(process.stdout);
+    // Uncomment to debug:
+    // command.stdout.pipe(process.stdout);
     command.stderr.pipe(process.stderr);
     command.stdout.on('data', Meteor.bindEnvironment(function(data){
       data = String(data).trim();
       if(data.substr(-6) === 'Ready.'){
-        console.log('PhantomJS Server is ready for commands.');
         fut['return'](executive);
       };
     }));
@@ -66,7 +67,7 @@ phantomLaunch = function(methods, port){
   return fut.wait();
 };
 
-// Return undefined if port open, 
+// Return undefined if port open,
 //        'in-use'  if port occupied by other server
 //        pid       if port occupied by phantomjs server
 var getPortStatus = function(port){

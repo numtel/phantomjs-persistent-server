@@ -13,6 +13,9 @@ var packageContents = function(api){
 
   api.addFiles('phantom-server.js', 'server', {isAsset: true});
   api.addFiles('methods/echoExample.js', 'server', {isAsset: true});
+  api.addFiles('methods/extractStyles.js', 'server', {isAsset: true});
+  api.addFiles('methods/getSheetsFromUrl.js', 'server', {isAsset: true});
+  api.addFiles('methods/renderThumbnail.js', 'server', {isAsset: true});
 
   api.addFiles('queue.js', 'server');
   api.export('phantomLaunch');
@@ -28,5 +31,6 @@ Package.onTest(function(api) {
   api.use('test-helpers');
   api.use('coffeescript');
   packageContents(api);
-  api.addFiles('phantomjs-queue-tests.coffee', 'server');
+  api.addFiles('test/methods/samplePageServer.js', 'server', {isAsset: true});
+  api.addFiles('test/queue.coffee', 'server');
 });
