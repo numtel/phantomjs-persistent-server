@@ -24,19 +24,31 @@ for(var i = 0; i < methodsArray.length; i++){
   console.log(success ? 'Success' : 'Failed');
 };
 
-var service = server.listen(options.port, function(request, response) {
-  if(request.post && request.post.method && 
-      methods.hasOwnProperty(request.post.method)){
-    methods[request.post.method](request.post, function(error, result){
+var service = server.listen(options.port, {
+  keepAlive: true
+}, function(request, response) {
+  if(request.post && request.headers.method && 
+      methods.hasOwnProperty(request.headers.method)){
+    var packetData = JSON.parse(request.post);
+    methods[request.headers.method](packetData, function(error, result){
+      var output;
       response.statusCode = 200;
-      response.write(JSON.stringify(error));
-      response.write(JSON.stringify(result));
+      if(error){
+        output = {error: 500, reason: error};
+      }else{
+        output = result;
+      };
+      var outputString = JSON.stringify(output);
+      response.setHeader('Content-Length', outputString.length);
+      response.write(outputString);
       response.close();
     });
   }else{
     response.statusCode = 404;
-    var errorMethod = {error: 404, reason: 'invalid-method', req: request};
-    response.write(JSON.stringify(errorMethod));
+    var error = {error: 404, reason: 'invalid-method', req: request};
+    var errorString = JSON.stringify(error);
+    response.setHeader('Content-Length', errorString.length);
+    response.write(errorString);
     response.close();
   };
 });

@@ -20,12 +20,25 @@ phantomLaunch = function(methods, port){
   };
   // Function to return for executing methods on this server
   var executive = function(method, options){
+    // TODO: launch Phantom if port open, error if something else on port
     var url = 'http://localhost:' + port + '/';
     console.log('Post to', url, options);
-    return HTTP.post(url, {
-      headers: {method: method},
-      params: options
+    var content = JSON.stringify(options);
+    var retval = HTTP.post(url, {
+      headers: {
+        method: method,
+        // Packaged PhantomJS is 1.8.1, requires Case-Sensitive header
+        // https://github.com/ariya/phantomjs/issues/11000
+        'Content-Length': content.length
+      },
+      content: content
     });
+    if(retval.statusCode === 200){
+      return JSON.parse(retval.content);
+    }else{
+      console.log('PhantomJS server error', retval);
+      throw new Meteor.Error(500, 'method-error');
+    };
   };
   
   var fut = new Future();
@@ -40,7 +53,8 @@ phantomLaunch = function(methods, port){
     command.stderr.pipe(process.stderr);
     command.stdout.on('data', Meteor.bindEnvironment(function(data){
       data = String(data).trim();
-      if(data === 'Ready.'){
+      if(data.substr(-6) === 'Ready.'){
+        console.log('PhantomJS Server is ready for commands.');
         fut['return'](executive);
       };
     }));
