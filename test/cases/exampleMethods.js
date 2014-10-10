@@ -1,8 +1,104 @@
-extractStylesSampleServerPort = 32459;
-var port = extractStylesSampleServerPort;
+// phantomjs-queue
+// MIT License ben@latenightsketches.com
+// Test Cases for example methods
 
-extractStylesCases = [
-  { // Error test case #1
+// Exports:
+// exampleMethodSampleServerPort: integer
+// exampleMethodTestCases: object
+
+exampleMethodSampleServerPort = 32459;
+var port = exampleMethodSampleServerPort;
+
+exampleMethodTestCases = {};
+// Called at the end of this document
+function exportTestCases(){
+  this.echo = {
+    src: 'methods/echoExample.js',
+    cases: echoCases
+  };
+  this.getSheetsFromUrl = {
+    src: 'methods/getSheetsFromUrl.js',
+    cases: getSheetsFromUrlCases
+  };
+  this.renderThumbnail = {
+    src: 'methods/renderThumbnail.js',
+    cases: renderThumbnailCases
+  };
+  this.extractStyles = {
+    src: 'methods/extractStyles.js',
+    cases: extractStylesCases
+  };
+};
+
+var echoCases = {
+  echo: {
+    options: {cow: 'horse'},
+    output: {cow: 'horse', echoed: "fo'sho"}
+  }
+};
+
+var getSheetsFromUrlCases = {
+  success: {
+    options: {url: 'http://localhost:' + port},
+    output: [
+      '<link rel="stylesheet" media="" ' +
+        'href="http://localhost:' + port + '/sample.css" type="">',
+      '<style>h2 { color: #00f; }</style>'
+    ]
+  },
+  failure: {
+    options: {url: 'http://notarealurl/'},
+    output: {
+      "error":500,
+      "reason":{"code":"load-failure"}
+    }
+  }
+};
+
+var renderThumbnailCases = {
+  failure: {
+    options: {
+      html: [
+        '<html test-ignore><head>',
+        '<link rel="stylesheet" media="" ',
+          'href="http://notrealurl/aaaaa.css" type="">',
+        '</head><body test-ignore>',
+        '<h1>Hello <em>world!</em></h1>',
+        '</body></html>'
+      ].join('\n'),
+      testWidth: 360,
+      width: 130,
+      height: 100
+    },
+    output: {
+      "error":500,
+      "reason":{
+        "code":"resource-failed",
+        "data":[
+          "http://notrealurl/aaaaa.css"
+        ]
+      }
+    }
+  },
+  success: {
+    options: {
+      html: [
+        '<html test-ignore><head>',
+        '<link rel="stylesheet" media="" ',
+          'href="http://localhost:' + port + '/sample.css" type="">',
+        '</head><body test-ignore>',
+        '<h1>Hello <em>world!</em></h1>',
+        '</body></html>'
+      ].join('\n'),
+      testWidth: 360,
+      width: 130,
+      height: 100
+    },
+    output: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC8AAAApCAYAAAClfnCxAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAPsAAAEOsBp0v8bwAABG9JREFUWIXtl31IlWcYxq+nY3WanijTPqTcBE8fixmmbnVYIo7B2TFBqjUYssXCURYrzUZuGlgmKtHMYZN99IFBAymoZkq0WoQry04aTS07hFvlkla6trmcXdf+6UiZLbWPsXF+8PC+PPcH1/ty3/fDA/jw4eO/iQBx8uSmR+31J34gcYNlyNNM/rT5n4nv6hqupqap3nWvSZKFmZl5nDjxJ44Zc51JSXt6+/RG0hAWFmbQbr9Aq7WTdvsFFhSslvRkf5wA9bW8tcvi4uUCxPXrs7Rt2yLa7edpt5+XZLzxvWuexcUfCBAdjmpu2bKUDke1ALG4ePkTF/9PDcukpD19flxb24SHio+NPSpArK9/CQB49myEADEu7sjj6vUbkHdAwG/y8+uG2x1lhg3r0u3bQw1pMcHBNx8ZK+m+J/nYZTOwBImJ+0x3tx+++uo91dTEYO7cCiUnlwH466ExCxbsBgCkppaytHQJli4tvbtfPmjVffGospFklJ+/hpMm/Uh//1tMSNgvjye0T9+775KGsKBgNcPDm2m1djI8vJmFhRlPvGF9+PDhw8e/BnNy1goQGxomP2CrqnpdgLh9+zsAwB073uXOnW8/e5UPgYmJ+2izdfR1MLGoaIUA8dy5F9XePlqA6HJV9CfvsznlamujERXlNsbwAVtDwzT5+/9upk8/rxMnXgEAzJ59vD9p7xPPlSs/ESB5PKF0u2cIEOPjDwEAly37lEOHdunSpRd48aKdSUl7GBJymQEBvzIh4Rt5PKGSnqPF0s2FC79mSsrnTE0tYUtLiGltnYCoqFoAYE1NNOPiDtNm66DLVYG6ukhERrqNMXfQ1DQFAOB0HhiweAQG3gAAWSwWs3lzmowRAOjKlSBs3boYKSlfoL19FCIi6uB2z8SaNYVwuSpNRUWCVq0q0pEjMebOHQsqK99AfX0EnM4qnDkTDQCIiTmt06ejMGdONVpankdubhZu3BhtTp58GTExtQCA69eDNHVqk4mOPtMf8ffBkpJUAeLRo7EcPvxPzp9fzvj4Q8zJWUurtZMtLSF0uSpoDNnYOAUAdO3aeAHirFnfMy8vU4BUWvp+T87s7HUCxObmcDqdlTSG3sZVefmbAuRtUC5Z8hlzcz8esHAA4K5dbwkQ583bzcTEfczJWUuHo5pBQW1MT98IABw16iaDg695b08sK0sWIKanb2RCwn5arZ2ShvXkdDoPaOTIdkmGNlsHx437uce2YkXRvVOIZWXJvHx50uDEe8eWMdSxY69yw4aPaAzp73+LV68GAwCnTftBgJiWtol5eZm02To4fnwrW1vHMjDwl3tvSJIMg4LaGB//LQAwPLxZgJiVtZ5paZtoDL1TiHv3zlVs7HesqnIOTvypUzPvlsBxSYb5+R8KELOz1/X41NVF0uGo5ogRfzAszMNFi7axtXUsGxun9PaVxxMqQMzIKAQAHjz4GsPCPBo5sp2LF39Jf/9bjIs7DABMTS0RILrdMwYl3ocPHz58+PDhA/gbQwu5/fT5vm4AAAAASUVORK5CYII="
+  }
+};
+var extractStylesCases = {
+  failure: {
     options: {
       html: [
         '<html test-ignore><head>',
@@ -25,7 +121,7 @@ extractStylesCases = [
       }
     }
   },
-  { // Successful test case #1
+  success: {
     options: {
       html: [
         '<html test-ignore><head>',
@@ -1923,4 +2019,6 @@ extractStylesCases = [
       ]
     }
   }
-];
+};
+
+exportTestCases.call(exampleMethodTestCases);

@@ -1,3 +1,5 @@
+// phantomjs-queue
+// MIT License ben@latenightsketches.com
 // Main PhantomJS module, creates server and routes methods
 
 var system = require('system');

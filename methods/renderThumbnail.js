@@ -1,4 +1,7 @@
+// phantomjs-queue
+// MIT License ben@latenightsketches.com
 // Return a PNG data URI string thumbnail of html code
+
 // 4 Required Options:
 // html      - string containing the page's html source
 // testWidth - integer width of viewport in pixels

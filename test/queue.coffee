@@ -1,53 +1,42 @@
-testAsyncMulti 'phantomjs-queue - echoExample', [
-  (test, expect) ->
-    phantomExec = phantomLaunch(['methods/echoExample.js'])
-    result = phantomExec('echo', {cow: 'horse'})
-    test.equal result.cow, 'horse'
-    test.equal result.echoed, "fo'sho"
-]
+# phantomjs-queue
+# MIT License ben@latenightsketches.com
+# Main Test Runner
 
-testAsyncMulti 'phantomjs-queue - getSheetsFromUrl', [
-  (test, expect) ->
-    phantomExec = phantomLaunch([
-      'test/methods/samplePageServer.js',
-      'methods/getSheetsFromUrl.js'
-    ])
-    port = 32459
-    phantomExec 'startServer', {port: port}
+methods = ['test/methods/samplePageServer.js']
+_.each exampleMethodTestCases, (methodDetails) ->
+  methods.push(methodDetails.src)
 
-    # Test success case
-    sheetsExpected = [
-      '<link rel="stylesheet" media="" ' +
-        'href="http://localhost:' + port + '/sample.css" type="">',
-      '<style>h2 { color: #00f; }</style>'
-    ]
-    sheetsOutput = phantomExec 'getSheetsFromUrl', {url: 'http://localhost:' + port}
-    sheetsExpected.forEach (exp) ->
-      test.isTrue sheetsOutput.indexOf(exp) > -1
+console.time 'phantomLaunch'
+phantomExec = phantomLaunch(methods)
+console.timeEnd 'phantomLaunch'
 
-    phantomExec 'stopServer'
+port = exampleMethodSampleServerPort
+phantomExec 'startServer', {port: port}
 
-    # Test failure case
-    sheetsFailOutput = phantomExec 'getSheetsFromUrl', {url: 'http://localhost:' + port}
-    test.equal sheetsFailOutput.error, 500
-    test.equal sheetsFailOutput.reason.code, 'load-failure'
-]
+# Count tests so that the sample server can be stopped after the last one
+testCount = 0
+testFinished = 0
 
-testAsyncMulti 'phantomjs-queue - extractStyles', [
-  (test, expect) ->
-    phantomExec = phantomLaunch([
-      'test/methods/samplePageServer.js',
-      'methods/extractStyles.js'
-    ])
-    port = extractStylesSampleServerPort
-    phantomExec 'startServer', {port: port}
+# Test each case in test/cases/exampleMethods.js
+_.each exampleMethodTestCases, (methodDetails, methodName) ->
+  _.each methodDetails.cases, (testCase, testCaseName) ->
+    testCount++
+    testAsyncMulti 'phantomjs-queue - Example Method: ' +
+                     methodName + ' - ' + testCaseName,
+    [ (test, expect) ->
+      methodOutput = phantomExec methodName, testCase.options
 
-    # Test each case in test/cases/extractStyles.js
-    extractStylesCases.forEach (testCase) ->
-      stylesOutput = phantomExec 'extractStyles', testCase.options
+      testFinished++
+      phantomExec 'stopServer' if testCount == testFinished
+
       if testCase.debug
-        console.log JSON.stringify stylesOutput
-      test.isTrue _.isEqual stylesOutput, testCase.output
+        console.log JSON.stringify methodOutput
+      # Allow multiple partial expectations or one full expectation
+      if testCase.output instanceof Array
+        testCase.output.forEach (expectedPart) ->
+          test.include methodOutput, expectedPart
+      else
+        test.isTrue _.isEqual methodOutput, testCase.output
+    ]
 
-    phantomExec 'stopServer'
-]
+

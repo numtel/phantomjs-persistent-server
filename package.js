@@ -1,3 +1,6 @@
+// phantomjs-queue
+// MIT License ben@latenightsketches.com
+
 Package.describe({
   summary: "PhantomJS Queue Manager",
   version: "0.0.1",
@@ -34,6 +37,6 @@ Package.onTest(function(api) {
 //   api.use('numtel:phantomjs-queue');
   packageContents(api);
   api.addFiles('test/methods/samplePageServer.js', 'server', {isAsset: true});
-  api.addFiles('test/cases/extractStyles.js', 'server');
+  api.addFiles('test/cases/exampleMethods.js', 'server');
   api.addFiles('test/queue.coffee', 'server');
 });

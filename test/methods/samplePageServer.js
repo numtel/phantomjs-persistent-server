@@ -1,5 +1,8 @@
+// phantomjs-queue
+// MIT License ben@latenightsketches.com
 // Create a webserver that will serve a sample page with a CSS file for
 // testing the provided methods
+
 // 1 Required Option:
 // port - integer port to run server
 (function(){

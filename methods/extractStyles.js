@@ -1,4 +1,7 @@
+// phantomjs-queue
+// MIT License ben@latenightsketches.com
 // Extract computed styles and applied rules of all elements in html code
+
 // 3 Required Options:
 // html   - string containing the page's html source
 // url    - string matches the same origin as the stylesheets in order to read

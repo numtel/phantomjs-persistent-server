@@ -1,3 +1,5 @@
+// phantomjs-queue
+// MIT License ben@latenightsketches.com
 // Main Meteor Package module, defines phantomLaunch function
 
 var Future = Npm.require('fibers/future');
