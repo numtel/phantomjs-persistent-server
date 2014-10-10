@@ -8,7 +8,7 @@ var server = require('webserver').create();
 var instance;
 
 var serverRequest = function(request, response){
-  var output;
+  var output, code;
   switch(request.url){
     case '/':
       output = [
@@ -22,9 +22,10 @@ var serverRequest = function(request, response){
       output = 'h1 { color: #f00; }';
       break;
     default:
+      code = 404
       output = 'Invalid request!';
   };
-  response.statusCode = 200;
+  response.statusCode = code || 200;
   response.write(output);
   response.close();
 };

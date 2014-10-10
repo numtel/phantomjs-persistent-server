@@ -31,5 +31,23 @@ testAsyncMulti 'phantomjs-queue - getSheetsFromUrl', [
     sheetsFailOutput = phantomExec 'getSheetsFromUrl', {url: 'http://localhost:' + port}
     test.equal sheetsFailOutput.error, 500
     test.equal sheetsFailOutput.reason.code, 'load-failure'
-    
+]
+
+testAsyncMulti 'phantomjs-queue - extractStyles', [
+  (test, expect) ->
+    phantomExec = phantomLaunch([
+      'test/methods/samplePageServer.js',
+      'methods/extractStyles.js'
+    ])
+    port = extractStylesSampleServerPort
+    phantomExec 'startServer', {port: port}
+
+    # Test each case in test/cases/extractStyles.js
+    extractStylesCases.forEach (testCase) ->
+      stylesOutput = phantomExec 'extractStyles', testCase.options
+      if testCase.debug
+        console.log JSON.stringify stylesOutput
+      test.isTrue _.isEqual stylesOutput, testCase.output
+
+    phantomExec 'stopServer'
 ]

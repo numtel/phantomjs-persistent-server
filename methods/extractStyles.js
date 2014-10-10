@@ -3,21 +3,20 @@
 // html   - string containing the page's html source
 // url    - string matches the same origin as the stylesheets in order to read
 //          the applied rules (security policy)
-// widths - string (integers, comma separated) specify which viewport widths in
-//          pixels to test
+// widths - array of integers specify which viewport widths to test (in pixels)
 (function(){
 
 methods.extractStyles = function(options, callback){
   var pageHtml = options.html;
   var testUrl = options.url;
-  var testWidths = options.widths.split(',');
+  var testWidths = options.widths;
   
   var page = require('webpage').create();
 
   var resourceFailures = [];
   page.onResourceReceived = function(response) {
     if(response.stage === 'end' && response.status !== 200){
-      resourceFailures.push(response);
+      resourceFailures.push(response.url);
     };
   };
 

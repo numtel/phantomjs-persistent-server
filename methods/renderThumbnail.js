@@ -22,7 +22,7 @@ methods.renderThumbnail = function(options, callback){
   var resourceFailures = [];
   page.onResourceReceived = function(response) {
     if(response.stage === 'end' && response.status !== 200){
-      resourceFailures.push(response);
+      resourceFailures.push(response.url);
     };
   };
 

@@ -30,7 +30,10 @@ Package.onTest(function(api) {
   api.use('tinytest');
   api.use('test-helpers');
   api.use('coffeescript');
+  api.use('underscore');
+//   api.use('numtel:phantomjs-queue');
   packageContents(api);
   api.addFiles('test/methods/samplePageServer.js', 'server', {isAsset: true});
+  api.addFiles('test/cases/extractStyles.js', 'server');
   api.addFiles('test/queue.coffee', 'server');
 });
