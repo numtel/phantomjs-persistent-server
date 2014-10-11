@@ -1,4 +1,4 @@
-// phantomjs-queue
+// phantomjs-persistent-server
 // MIT License ben@latenightsketches.com
 // Main PhantomJS module, creates server and routes methods
 

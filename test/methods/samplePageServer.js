@@ -1,4 +1,4 @@
-// phantomjs-queue
+// phantomjs-persistent-server
 // MIT License ben@latenightsketches.com
 // Create a webserver that will serve a sample page with a CSS file for
 // testing the provided methods

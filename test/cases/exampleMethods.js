@@ -1,4 +1,4 @@
-// phantomjs-queue
+// phantomjs-persistent-server
 // MIT License ben@latenightsketches.com
 // Test Cases for example methods
 

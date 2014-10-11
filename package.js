@@ -1,10 +1,10 @@
-// phantomjs-queue
+// phantomjs-persistent-server
 // MIT License ben@latenightsketches.com
 
 Package.describe({
   summary: "PhantomJS Queue Manager",
   version: "0.0.1",
-  git: "https://github.com/numtel/phantomjs-queue.git"
+  git: "https://github.com/numtel/phantomjs-persistent-server.git"
 });
 
 var packageContents = function(api){
@@ -34,7 +34,7 @@ Package.onTest(function(api) {
   api.use('test-helpers');
   api.use('coffeescript');
   api.use('underscore');
-//   api.use('numtel:phantomjs-queue');
+//   api.use('numtel:phantomjs-persistent-server');
   packageContents(api);
   api.addFiles('test/methods/samplePageServer.js', 'server', {isAsset: true});
   api.addFiles('test/cases/exampleMethods.js', 'server');

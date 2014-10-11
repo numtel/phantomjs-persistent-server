@@ -1,4 +1,4 @@
-// phantomjs-queue
+// phantomjs-persistent-server
 // MIT License ben@latenightsketches.com
 // Return a PNG data URI string thumbnail of html code
 

@@ -2,13 +2,13 @@
 
 Specify PhantomJS methods and execute them quickly with very little configuration.
 
-[![Build Status](https://travis-ci.org/numtel/phantomjs-queue.svg?branch=master)](https://travis-ci.org/numtel/phantomjs-queue)
+[![Build Status](https://travis-ci.org/numtel/phantomjs-persistent-server.svg?branch=master)](https://travis-ci.org/numtel/phantomjs-persistent-server)
 
 ## Installation
 
 Run the following command **Not Yet**
 
-    meteor add numtel:phantomjs-queue
+    meteor add numtel:phantomjs-persistent-server
 
 ## Implements
 

@@ -1,4 +1,4 @@
-# phantomjs-queue
+# phantomjs-persistent-server
 # MIT License ben@latenightsketches.com
 # Main Test Runner
 
@@ -21,7 +21,7 @@ testFinished = 0
 _.each exampleMethodTestCases, (methodDetails, methodName) ->
   _.each methodDetails.cases, (testCase, testCaseName) ->
     testCount++
-    testAsyncMulti 'phantomjs-queue - Example Method: ' +
+    testAsyncMulti 'phantomjs-persistent-server - Example Method: ' +
                      methodName + ' - ' + testCaseName,
     [ (test, expect) ->
       methodOutput = phantomExec methodName, testCase.options
