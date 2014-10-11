@@ -6,30 +6,43 @@ var Future = Npm.require('fibers/future');
 var phantomjs = Npm.require('phantomjs');
 var shell = Npm.require('child_process');
 
-// methods: array of filenames relative to package asset directory
-//          each file should append entries to the methods object like so:
-//          methods.example = function(options, callback){
-//            if(error) callback(error);
-//            else callback(undefined, output);
-//          }
-// port:    optionally, specify a port number. Undefined will auto-select a port.
-phantomLaunch = function(methods, port){
-  var portStatus;
+// Options
+// port: specify a port number. Undefined auto-selects a port.
+phantomLaunch = function(options){
+  var port;
+  options = options || {};
+  if(options.port) port = options.port;
+
   if(!port){
     // An unspecified port will automatically select a port
     port = 13470; // Default port
     while(getPortStatus(port) !== undefined){
       port++;
     };
+    options.port = port;
   };
-  // Function to return for executing methods on this server
-  var executive = function(method, options){
-    // TODO: launch Phantom if port open, error if something else on port
+
+  // Returned by phantomLaunch for executing methods on this server
+  // func: function copied as string and executed in phantomjs context
+  //       In addition to the args defined, a last argument, 'callback' must
+  //       be accepted. By default, async.
+  //       Called as normal callback(error, result).
+  // args... any more parameters will be applied to the function passed
+  // TODO: test for phantom disappearance and try to remedy
+  //        launch Phantom if port open, error if something else on port
+  var executive = function(/* arguments */){
+    var args = Array.prototype.slice.call(arguments, 0);
+    var func = args.shift();
+    if(typeof func !== 'function'){
+      throw new Meteor.Error(400, 'function-required');
+    };
     var url = 'http://localhost:' + port + '/';
-    var content = JSON.stringify(options || {});
+    var content = JSON.stringify({
+      func: func.toString(),
+      args: args
+    });
     var retval = HTTP.post(url, {
       headers: {
-        method: method,
         // Packaged PhantomJS is 1.8.1, requires Case-Sensitive header
         // https://github.com/ariya/phantomjs/issues/11000
         'Content-Length': content.length
@@ -44,14 +57,15 @@ phantomLaunch = function(methods, port){
     };
   };
 
+  // Check port status then start PhantomJS
   var fut = new Future();
-  portStatus = getPortStatus(port);
+  var portStatus = getPortStatus(port);
   if(portStatus === 'in-use'){
     // Port in use by a different server
     throw new Meteor.Error(500, 'port-in-use');
   }else if(portStatus === undefined){
     var command = shell.spawn(phantomjs.path,
-      [assetDir + 'phantom-server.js', port, methods.join(',')]);
+      [assetDir + 'src/phantom-server.js', port]);
     // Uncomment to debug:
     // command.stdout.pipe(process.stdout);
     command.stderr.pipe(process.stderr);
@@ -63,11 +77,12 @@ phantomLaunch = function(methods, port){
     }));
     command.on('exit', Meteor.bindEnvironment(function(code){
       // Restart on exit
-      phantomLaunch(port, methods);
+      phantomLaunch(options);
     }));
   };
   return fut.wait();
 };
+
 
 // Return undefined if port open,
 //        'in-use'  if port occupied by other server

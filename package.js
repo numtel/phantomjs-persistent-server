@@ -2,7 +2,7 @@
 // MIT License ben@latenightsketches.com
 
 Package.describe({
-  summary: "PhantomJS Queue Manager",
+  summary: "PhantomJS Persistent Server",
   version: "0.0.1",
   git: "https://github.com/numtel/phantomjs-persistent-server.git"
 });
@@ -14,13 +14,8 @@ var packageContents = function(api){
   api.addFiles('assetKey.js', 'server', {isAsset: true});
   api.addFiles('assetKey.js', 'server');
 
-  api.addFiles('phantom-server.js', 'server', {isAsset: true});
-  api.addFiles('methods/echoExample.js', 'server', {isAsset: true});
-  api.addFiles('methods/extractStyles.js', 'server', {isAsset: true});
-  api.addFiles('methods/getSheetsFromUrl.js', 'server', {isAsset: true});
-  api.addFiles('methods/renderThumbnail.js', 'server', {isAsset: true});
-
-  api.addFiles('queue.js', 'server');
+  api.addFiles('src/phantom-server.js', 'server', {isAsset: true});
+  api.addFiles('src/main.js', 'server');
   api.export('phantomLaunch');
 };
 
@@ -34,9 +29,6 @@ Package.onTest(function(api) {
   api.use('test-helpers');
   api.use('coffeescript');
   api.use('underscore');
-//   api.use('numtel:phantomjs-persistent-server');
   packageContents(api);
-  api.addFiles('test/methods/samplePageServer.js', 'server', {isAsset: true});
-  api.addFiles('test/cases/exampleMethods.js', 'server');
-  api.addFiles('test/queue.coffee', 'server');
+  api.addFiles('test/main.coffee', 'server');
 });

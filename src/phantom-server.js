@@ -1,11 +1,10 @@
 // phantomjs-persistent-server
 // MIT License ben@latenightsketches.com
-// Main PhantomJS module, creates server and routes methods
+// PhantomJS server (runs in PhantomJS context)
 
 var system = require('system');
 var options = {
-  port: system.args[1],
-  methods: system.args[2] || ''
+  port: system.args[1]
 };
 
 if(!options.port){
@@ -18,39 +17,34 @@ var server = webserver.create();
 
 console.log('PhantomJS server starting on port', options.port);
 
-// Load available methods
-var methods = {};
-var methodsArray = options.methods.split(',');
-
-for(var i = 0; i < methodsArray.length; i++){
-  var success = phantom.injectJs(methodsArray[i]);
-  if(!success){
-    console.log('Failed to load', methodsArray[i]);
-  };
-};
-
 var service = server.listen(options.port, {
   keepAlive: true
 }, function(request, response) {
-  if(request.post && request.headers.method && 
-      methods.hasOwnProperty(request.headers.method)){
+  
+  if(request.post){
     var packetData = JSON.parse(request.post);
-    methods[request.headers.method](packetData, function(error, result){
+    var func = eval('(' + packetData.func + ')');
+    var args = packetData.args;
+
+    var funcCallback = function(error, result){
       var output;
-      response.statusCode = 200;
       if(error){
+        response.statusCode = 500;
         output = {error: 500, reason: error};
       }else{
+        response.statusCode = 200;
         output = result;
       };
       var outputString = JSON.stringify(output || null);
       response.setHeader('Content-Length', outputString.length);
       response.write(outputString);
       response.close();
-    });
+    };
+    args.push(funcCallback);
+    func.apply(this, args);
   }else{
-    response.statusCode = 404;
-    var error = {error: 404, reason: 'invalid-method', req: request};
+    response.statusCode = 400;
+    var error = {error: 400, reason: 'post-required', req: request};
     var errorString = JSON.stringify(error);
     response.setHeader('Content-Length', errorString.length);
     response.write(errorString);
