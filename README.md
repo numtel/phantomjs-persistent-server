@@ -19,7 +19,8 @@ Spool up a PhantomJS instance that can listen for requests.
 
 Key    | Description
 -------|----------------------------------------------------------------------
-`port` | Optionally, specify a port to run the PhantomJS server. If left undefined, the port will be determined automatically.
+`port` | Specify a port to run the PhantomJS server. If left undefined, the port will be determined automatically.
+`debug` | On `True`, PhantomJS stdout will be forwarded
 
 **Returns:** Function for executing methods.
 

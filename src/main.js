@@ -8,6 +8,7 @@ var shell = Npm.require('child_process');
 
 // Options
 // port: specify a port number. Undefined auto-selects a port.
+// debug: boolean. forward PhantomJS stdout on true
 phantomLaunch = function(options){
   var port;
   options = options || {};
@@ -66,8 +67,9 @@ phantomLaunch = function(options){
   }else if(portStatus === undefined){
     var command = shell.spawn(phantomjs.path,
       [assetDir + 'src/phantom-server.js', port]);
-    // Uncomment to debug:
-    // command.stdout.pipe(process.stdout);
+    if(options.debug){
+      command.stdout.pipe(process.stdout);
+    };
     command.stderr.pipe(process.stderr);
     command.stdout.on('data', Meteor.bindEnvironment(function(data){
       data = String(data).trim();
