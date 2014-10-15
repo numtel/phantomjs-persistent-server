@@ -17,10 +17,11 @@ Launch a PhantomJS instance that can listen for requests.
 
 **Options:**
 
-Key    | Description
--------|----------------------------------------------------------------------
-`port` | Specify a port to run the PhantomJS server. If left undefined, the port will be determined automatically.
-`debug` | On `True`, PhantomJS stdout will be forwarded along with other debug info
+Key    | Type | Default |Description
+-------|------|---------|------------------------------------------------------
+`port` | Integer | `13470` | Port to run PhantomJS server
+`autoPort` | Boolean | `true` | Scan for next free port if in use
+`debug` | Boolean | `false` | Forward PhantomJS stdout as well as other debug info
 
 **Returns:** Function for executing methods.
 
@@ -29,7 +30,8 @@ Key    | Description
 The first argument, `func` (function), is copied as a string to the PhantomJS
 server. This means that it is not included in the context of the surrounding
 code but within the PhantomJS context. All parameters must be passed in as
-JSON-serializable objects in the following arguments.
+JSON-serializable objects in the following arguments and no external functions
+may be called.
 
 ## Example in CoffeeScript
 

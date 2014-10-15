@@ -9,18 +9,25 @@ var fs = Npm.require('fs');
 
 // Options
 // port: specify a port number. Undefined auto-selects a port.
+// autoPort: boolean (default true) scan to find free port
 // debug: boolean. forward PhantomJS stdout on true
 phantomLaunch = function(options){
   var port;
   options = options || {};
+  if(options.autoPort === undefined) options.autoPort = true;
   if(options.port) port = options.port;
+
+  var findNextPort = function(port){
+    while(getPortStatus(port) === 'in-use'){
+      port++;
+    };
+    return port;
+  };
 
   if(!port){
     // An unspecified port will automatically select a port
     port = 13470; // Default port
-    while(getPortStatus(port) === 'in-use'){
-      port++;
-    };
+    if(options.autoPort) port = findNextPort(port);
     options.port = port;
   };
 
@@ -89,7 +96,13 @@ phantomLaunch = function(options){
           };
           fut['return'](phantomLaunch(options));
         }else{
-          throw new Meteor.Error(500, 'port-in-use');
+          if(options.autoPort){
+           port = findNextPort(++port);
+           options.port = port;
+           fut['return'](phantomLaunch(options));
+          }else{
+            throw new Meteor.Error(500, 'port-in-use');
+          };
         };
       }));
     }));

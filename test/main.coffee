@@ -7,6 +7,13 @@ phantomExec = phantomLaunch
   debug: true
 console.timeEnd 'phantomLaunch'
 
+testAsyncMulti 'phantomjs-persistent-server - second server', [
+  (test, expect) ->
+    exec2 = phantomLaunch
+      debug: true
+    test.equal typeof exec2, 'function'
+]
+
 testAsyncMulti 'phantomjs-persistent-server - echo', [
   (test, expect) ->
     sample = {cow: 'horse'}
