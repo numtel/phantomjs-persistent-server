@@ -85,9 +85,11 @@ phantomLaunch = function(options){
         if(isInit){
           process.kill(portStatus, 'SIGINT');
           if(options.debug){
-            console.log("Recovering orphaned port ", port);
+            console.log('Recovering orphaned port', port);
           };
           fut['return'](phantomLaunch(options));
+        }else{
+          throw new Meteor.Error(500, 'port-in-use');
         };
       }));
     }));

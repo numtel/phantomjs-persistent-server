@@ -5,15 +5,15 @@ for execution.
 
 ## Installation
 
-Run the following command
-
-    meteor add numtel:phantomjs-persistent-server
+```bash
+$ meteor add numtel:phantomjs-persistent-server
+```
 
 ## Implements
 
 #### phantomLaunch({...})
 
-Spool up a PhantomJS instance that can listen for requests.
+Launch a PhantomJS instance that can listen for requests.
 
 **Options:**
 
@@ -61,4 +61,12 @@ if Meteor.isServer
 
 ## Run Tests
 
-    meteor test-packages ./
+```bash
+$ git clone https://github.com/numtel/phantomjs-persistent-server.git
+$ cd phantomjs-persistent-server
+$ meteor test-packages ./
+```
+
+## License
+
+MIT
