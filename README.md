@@ -20,7 +20,7 @@ Spool up a PhantomJS instance that can listen for requests.
 Key    | Description
 -------|----------------------------------------------------------------------
 `port` | Specify a port to run the PhantomJS server. If left undefined, the port will be determined automatically.
-`debug` | On `True`, PhantomJS stdout will be forwarded
+`debug` | On `True`, PhantomJS stdout will be forwarded along with other debug info
 
 **Returns:** Function for executing methods.
 
@@ -58,3 +58,7 @@ if Meteor.isServer
   result = phantomExec titleTest, 'http://google.com/'
   console.log result # Print 'Google'
 ```
+
+## Run Tests
+
+    meteor test-packages ./

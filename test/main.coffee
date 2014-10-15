@@ -3,7 +3,8 @@
 # Main Test Runner
 
 console.time 'phantomLaunch'
-phantomExec = phantomLaunch()
+phantomExec = phantomLaunch
+  debug: true
 console.timeEnd 'phantomLaunch'
 
 testAsyncMulti 'phantomjs-persistent-server - echo', [

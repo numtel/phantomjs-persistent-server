@@ -5,6 +5,7 @@
 var Future = Npm.require('fibers/future');
 var phantomjs = Npm.require('phantomjs');
 var shell = Npm.require('child_process');
+var fs = Npm.require('fs');
 
 // Options
 // port: specify a port number. Undefined auto-selects a port.
@@ -17,7 +18,7 @@ phantomLaunch = function(options){
   if(!port){
     // An unspecified port will automatically select a port
     port = 13470; // Default port
-    while(getPortStatus(port) !== undefined){
+    while(getPortStatus(port) === 'in-use'){
       port++;
     };
     options.port = port;
@@ -64,7 +65,34 @@ phantomLaunch = function(options){
   if(portStatus === 'in-use'){
     // Port in use by a different server
     throw new Meteor.Error(500, 'port-in-use');
-  }else if(portStatus === undefined){
+  }else if(portStatus !== undefined){
+    // Port has phantomjs, check if orphaned
+    fs.readFile('/proc/' + portStatus + '/status',
+        Meteor.bindEnvironment(function(error, data){
+      if(error) throw new Meteor.Error(500, error);
+      data = String(data);
+      var pPid = data.match(/PPid:[\s]+[0-9]+/);
+      if(pPid.length === 0){
+        throw new Meteor.Error(500, 'server-error');
+      };
+      // Extract from matched array
+      pPid = pPid[0].substr(5).trim();
+      fs.readFile('/proc/' + pPid + '/status',
+          Meteor.bindEnvironment(function(error, parentStatus){
+        if(error) throw new Meteor.Error(500, error);
+        parentStatus = String(parentStatus);
+        var isInit = /^Name:[\s]+init/.test(parentStatus);
+        if(isInit){
+          process.kill(portStatus, 'SIGINT');
+          if(options.debug){
+            console.log("Recovering orphaned port ", port);
+          };
+          fut['return'](phantomLaunch(options));
+        };
+      }));
+    }));
+  }else{
+    // Port is open
     var command = shell.spawn(phantomjs.path,
       [assetDir + 'src/phantom-server.js', port]);
     if(options.debug){
