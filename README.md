@@ -1,9 +1,10 @@
 # PhantomJS Persistent Server Meteor Package
 
-## Currently debugging Travis CI, latest commit not stable
-
 Synchronously spawn a PhantomJS instance then pass functions to its context
 for execution.
+
+[![Build Status](https://travis-ci.org/numtel/phantomjs-persistent-server.svg?branch=master)](https://travis-ci.org/numtel/phantomjs-persistent-server)
+
 
 ## Installation
 
