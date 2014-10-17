@@ -1,0 +1,1 @@
+phantomjs = { path: 'phantomjs' }

@@ -1,10 +1,6 @@
 {
   "dependencies": [
     [
-      "gadicohen:phantomjs",
-      "0.0.2"
-    ],
-    [
       "http",
       "1.0.6"
     ],

@@ -1,5 +1,7 @@
 # PhantomJS Persistent Server Meteor Package
 
+## Currently debugging Travis CI, latest commit not stable
+
 Synchronously spawn a PhantomJS instance then pass functions to its context
 for execution.
 
@@ -13,7 +15,9 @@ $ meteor add numtel:phantomjs-persistent-server
 
 #### phantomLaunch({...})
 
-Launch a PhantomJS instance that can listen for requests.
+Launch a PhantomJS instance that can listen for requests. If PhantomJS is 
+installed, the installed version will be used. If not available, the
+package `gadicohen:phantomjs` will be used.
 
 **Options:**
 
