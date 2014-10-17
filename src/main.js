@@ -50,19 +50,20 @@ phantomLaunch = function(options){
       func: func.toString(),
       args: args
     });
-    var retval = HTTP.post(url, {
-      headers: {
-        // Packaged PhantomJS is 1.8.1, requires Case-Sensitive header
-        // https://github.com/ariya/phantomjs/issues/11000
-        'Content-Length': content.length
-      },
-      content: content
-    });
-    if(retval.statusCode === 200){
+    try{
+      var retval = HTTP.post(url, {
+        headers: {
+          // Packaged PhantomJS is 1.8.1, requires Case-Sensitive header
+          // https://github.com/ariya/phantomjs/issues/11000
+          'Content-Length': content.length
+        },
+        content: content
+      });
+    }catch(err){
+      throw new Meteor.Error(500, err.toString());
+    }
+    if(retval && retval.statusCode === 200){
       return JSON.parse(retval.content);
-    }else{
-      console.log('PhantomJS server error', retval);
-      throw new Meteor.Error(500, 'method-error');
     };
   };
 

@@ -41,7 +41,16 @@ var service = server.listen(options.port, {
       response.close();
     };
     args.push(funcCallback);
-    func.apply(this, args);
+    try{
+      func.apply(this, args);
+    }catch(err){
+      response.statusCode = 500;
+      var output = {error: 500, reason: err.toString()};
+      var outputString = JSON.stringify(output);
+      response.setHeader('Content-Length', outputString.length);
+      response.write(outputString);
+      response.close();
+    };
   }else{
     response.statusCode = 400;
     var error = {error: 400, reason: 'post-required', req: request};

@@ -23,6 +23,33 @@ testAsyncMulti 'phantomjs-persistent-server - echo', [
     test.isTrue _.isEqual result, sample
 ]
 
+testAsyncMulti 'phantomjs-persistent-server - handled error', [
+  (test, expect) ->
+    errorTest = (options, callback) ->
+      callback 'load-failure'
+    try
+      result = phantomExec errorTest, {}
+    catch err
+      test.equal err.reason,
+        'Error: failed [500] {"error":500,"reason":"load-failure"}'
+      test.equal err.error, 500
+    test.isUndefined result
+]
+
+testAsyncMulti 'phantomjs-persistent-server - unhandled error', [
+  (test, expect) ->
+    errorTest = (options, callback) ->
+      invalidsymbol.horse()
+      callback undefined, 'success'
+    try
+      result = phantomExec errorTest, {}
+    catch err
+      test.equal err.reason, 'Error: failed [500] {"error":500,"reason":"' + \
+        'ReferenceError: Can\'t find variable: invalidsymbol"}'
+      test.equal err.error, 500
+    test.isUndefined result
+]
+
 testAsyncMulti 'phantomjs-persistent-server - no arguments', [
   (test, expect) ->
     argTest = (callback) ->
@@ -67,7 +94,7 @@ testAsyncMulti 'phantomjs-persistent-server - get page title (failure)', [
     try
       result = phantomExec titleTest, 'http://asjdfoafm/'
     catch err
-      test.equal err.toString(),
+      test.equal err.reason,
         'Error: failed [500] {"error":500,"reason":"load-failure"}'
       hadError = true
     finally
