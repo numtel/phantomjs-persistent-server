@@ -22,11 +22,16 @@ package `gadicohen:phantomjs` will be used.
 
 **Options:**
 
-Key    | Type | Default |Description
--------|------|---------|------------------------------------------------------
-`port` | Integer | `13470` | Port to run PhantomJS server
-`autoPort` | Boolean | `true` | Scan for next free port if in use
-`debug` | Boolean | `false` | Forward PhantomJS stdout as well as other debug info
+Key    | Type |Description
+-------|------|------------------------------------------------------
+`port` | Integer | Port to run PhantomJS server, leave unspecified for any open port
+`forcePort` | Boolean | Kill PhantomJS if currently using port
+`debug` | Boolean | Forward PhantomJS stdout as well as other debug info
+
+*Notes:* 
+
+* When using an automatically selected port, automatic code pushes will result in orphaned PhantomJS processes that will exist until the Meteor server closes.
+* If specifying a port, `forcePort` must be set to `true` for automatic code pushes to restart the PhantomJS server.
 
 **Returns:** Function for executing methods.
 
@@ -37,6 +42,13 @@ server. This means that it is not included in the context of the surrounding
 code but within the PhantomJS context. All parameters must be passed in as
 JSON-serializable objects in the following arguments and no external functions
 may be called.
+
+The returned function also contains the following properties and methods:
+```javascript
+var phantomExec = phantomLaunch();
+console.log(phantomExec.port) // Print port number
+phantomExec.kill() // Kill server (will not kill orphaned processes)
+```
 
 ## Example in CoffeeScript
 

@@ -3,9 +3,11 @@
 
 Package.describe({
   summary: "PhantomJS Persistent Server",
-  version: "0.0.8",
+  version: "0.0.9",
   git: "https://github.com/numtel/phantomjs-persistent-server.git"
 });
+
+Npm.depends({ 'get-port': '1.0.0' });
 
 var Future = Npm.require('fibers/future');
 var shell = Npm.require('child_process');

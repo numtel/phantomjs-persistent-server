@@ -9,27 +9,13 @@ var fs = Npm.require('fs');
 
 // Options
 // port: specify a port number. Undefined auto-selects a port.
-// autoPort: boolean (default true) scan to find free port
+// forcePort: boolean. Kill PhantomJS if currently using port
 // debug: boolean. forward PhantomJS stdout on true
 phantomLaunch = function(options){
   var port;
   options = options || {};
-  if(options.autoPort === undefined) options.autoPort = true;
   if(options.port) port = options.port;
-
-  var findNextPort = function(port){
-    while(getPortStatus(port) === 'in-use'){
-      port++;
-    };
-    return port;
-  };
-
-  if(!port){
-    // An unspecified port will automatically select a port
-    port = 13470; // Default port
-    if(options.autoPort) port = findNextPort(port);
-    options.port = port;
-  };
+  else port = getOpenPort();
 
   // Returned by phantomLaunch for executing methods on this server
   // func: function copied as string and executed in phantomjs context
@@ -67,70 +53,63 @@ phantomLaunch = function(options){
     };
   };
 
+  // Public properties/methods
+  executive.port = port;
+  executive.kill = function(){
+    options.debug && console.log(
+      'Killing PhantomJS on port', port, ', pid', executive.pid);
+    process.kill(executive.pid, 'SIGINT');
+  };
+
   // Check port status then start PhantomJS
   var fut = new Future();
   var portStatus = getPortStatus(port);
-  if(portStatus === 'in-use'){
-    // Port in use by a different server
-    throw new Meteor.Error(500, 'port-in-use');
-  }else if(portStatus !== undefined){
-    // Port has phantomjs, check if orphaned
-    fs.readFile('/proc/' + portStatus + '/status',
-        Meteor.bindEnvironment(function(error, data){
-      if(error) throw new Meteor.Error(500, error);
-      data = String(data);
-      var pPid = data.match(/PPid:[\s]+[0-9]+/);
-      if(pPid.length === 0){
-        throw new Meteor.Error(500, 'server-error');
-      };
-      // Extract from matched array
-      pPid = pPid[0].substr(5).trim();
-      fs.readFile('/proc/' + pPid + '/status',
-          Meteor.bindEnvironment(function(error, parentStatus){
-        if(error) throw new Meteor.Error(500, error);
-        parentStatus = String(parentStatus);
-        var isInit = /^Name:[\s]+init/.test(parentStatus);
-        if(isInit){
-          process.kill(portStatus, 'SIGINT');
-          if(options.debug){
-            console.log('Recovering orphaned port', port);
-          };
-          fut['return'](phantomLaunch(options));
-        }else{
-          if(options.autoPort){
-           port = findNextPort(++port);
-           options.port = port;
-           fut['return'](phantomLaunch(options));
-          }else{
-            throw new Meteor.Error(500, 'port-in-use');
-          };
-        };
-      }));
-    }));
+  if(portStatus !== null){
+    if(options.forcePort){
+      // Kill phantomjs process in specified port
+      options.debug && console.log(
+        'Recovering oprhaned port', port,
+        'from PhantomJS, pid', portStatus);
+      process.kill(portStatus, 'SIGINT');
+    }else{
+      // Port in use by a different server
+      throw new Meteor.Error(500, 'port-in-use');
+    }
   }else{
     // Port is open
     var command = shell.spawn(phantomjs.path,
       [assetDir + 'src/phantom-server.js', port]);
-    if(options.debug){
-      command.stdout.pipe(process.stdout);
-    };
+    options.debug && command.stdout.pipe(process.stdout);
     command.stderr.pipe(process.stderr);
     command.stdout.on('data', Meteor.bindEnvironment(function(data){
       data = String(data).trim();
       if(data.substr(-6) === 'Ready.'){
+        executive.pid = command.pid;
         fut['return'](executive);
       };
     }));
     command.on('exit', Meteor.bindEnvironment(function(code){
       // Restart on exit
-      phantomLaunch(options);
+      var newExec = phantomLaunch(options);
+      // Update handle, port may change on auto-port
+      executive.port = port = newExec.port;
+      executive.pid = newExec.pid;
     }));
   };
   return fut.wait();
 };
 
+// Return an unused TCP port
+var getOpenPort = function(){
+  var fut = new Future();
+  Npm.require('get-port')(function (err, port) {
+    if(err) return fut['throw'](err);
+    fut['return'](port);
+  }); 
+  return fut.wait();
+};
 
-// Return undefined if port open,
+// Return null       if port open,
 //        'in-use'  if port occupied by other server
 //        pid       if port occupied by phantomjs server
 var getPortStatus = function(port){
@@ -140,7 +119,7 @@ var getPortStatus = function(port){
     if(!fut.isResolved()){
       data = String(data).split('\n');
       if(data.length < 3){
-        return fut['return'](undefined);
+        return fut['return'](null);
       };
       var infoLine = data[1].split(' ');
       if(infoLine[0] === 'phantomjs'){
@@ -158,7 +137,7 @@ var getPortStatus = function(port){
   command.on('exit', Meteor.bindEnvironment(function(code){
     Meteor.setTimeout(function(){
       if(!fut.isResolved()){
-        fut['return'](undefined);
+        fut['return'](null);
       };
     }, 100);
   }));

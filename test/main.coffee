@@ -7,11 +7,28 @@ phantomExec = phantomLaunch
   debug: true
 console.timeEnd 'phantomLaunch'
 
-testAsyncMulti 'phantomjs-persistent-server - second server', [
+testAsyncMulti 'phantomjs-persistent-server - second server + kill', [
   (test, expect) ->
     exec2 = phantomLaunch
       debug: true
+    exec2Port = exec2.port
     test.equal typeof exec2, 'function'
+    exec2.kill()
+
+    # Ensure port is open by starting another server
+    exec2 = phantomLaunch
+      debug: true
+      port: exec2Port
+    test.equal typeof exec2, 'function'
+]
+
+testAsyncMulti 'phantomjs-persistent-server - second server same port failure', [
+  (test, expect) ->
+    test.throws (->
+        exec2 = phantomLaunch
+          debug: true
+          port: phantomExec.port
+      ), 'port-in-use'
 ]
 
 testAsyncMulti 'phantomjs-persistent-server - echo', [
