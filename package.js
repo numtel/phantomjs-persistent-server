@@ -2,12 +2,16 @@
 // MIT License ben@latenightsketches.com
 
 Package.describe({
+  name: "numtel:phantomjs-persistent-server",
   summary: "PhantomJS Persistent Server",
-  version: "0.0.9",
+  version: "0.0.10",
   git: "https://github.com/numtel/phantomjs-persistent-server.git"
 });
 
-Npm.depends({ 'get-port': '1.0.0' });
+Npm.depends({
+  'get-port': '1.0.0',
+  'phantomjs': '1.9.18'
+});
 
 var Future = Npm.require('fibers/future');
 var shell = Npm.require('child_process');
