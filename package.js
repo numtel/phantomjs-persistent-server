@@ -4,7 +4,7 @@
 Package.describe({
   name: "numtel:phantomjs-persistent-server",
   summary: "PhantomJS Persistent Server",
-  version: "0.0.10",
+  version: "0.0.11",
   git: "https://github.com/numtel/phantomjs-persistent-server.git"
 });
 

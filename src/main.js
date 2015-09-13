@@ -82,6 +82,8 @@ phantomLaunch = function(options){
     options.debug && command.stdout.pipe(process.stdout);
     command.stderr.pipe(process.stderr);
     command.stdout.on('data', Meteor.bindEnvironment(function(data){
+      options.debug && console.log(String(data));
+
       data = String(data).trim();
       if(data.substr(-6) === 'Ready.'){
         executive.pid = command.pid;
